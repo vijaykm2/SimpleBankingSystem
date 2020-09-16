@@ -6,6 +6,7 @@ import sqlite3
 class BankingSystem:
     random.seed()
     conn = None
+
     def __init__(self):
         self.bank_accounts = {}
         self.conn = sqlite3.connect('card.s3db')
@@ -18,7 +19,6 @@ class BankingSystem:
             ([id] INTEGER primary key, [number] TEXT, [pin] TEXT, [balance] INTEGER DEFAULT 0)''')
         self.conn.commit()
 
-
     def login(self) -> str:
         card_num = input('Enter your card number:\n')
         pin = input('Enter your PIN:')
@@ -27,7 +27,8 @@ class BankingSystem:
         if curr.fetchone()[0] > 0:
             print('You have successfully logged in!')
             while True:
-                user_choice = input('1. Balance\n2. Add Income\n 3. Do Transfer\n 4. Close Account \n5. Log out\n0. Exit\n')
+                user_choice = input(
+                    '1. Balance\n2. Add Income\n 3. Do Transfer\n 4. Close Account \n5. Log out\n0. Exit\n')
                 if user_choice == '1':
                     print(f'\nBalance: {self.get_balance(card_num)}\n')
                 elif user_choice == '2':
@@ -52,9 +53,9 @@ class BankingSystem:
         curr = self.conn.cursor()
         while not created:
             new_acct = random.randint(100000000, 999999999)
-            bank_id_num = '400000'+str(new_acct)
+            bank_id_num = '400000' + str(new_acct)
             check_sum = self.get_check_sum(bank_id_num)
-            new_acct_num = bank_id_num+check_sum
+            new_acct_num = bank_id_num + check_sum
             curr.execute(f"select count(*) from card where number = {new_acct_num}")
 
             if curr.fetchone()[0] == 0:
@@ -76,7 +77,7 @@ class BankingSystem:
         digits = [int(num) for num in chars]
         sum = 0
         for i in range(len(digits)):
-            if i%2 == 0:
+            if i % 2 == 0:
                 digits[i] *= 2
             if digits[i] > 9:
                 digits[i] -= 9
@@ -84,7 +85,7 @@ class BankingSystem:
             sum += digits[i]
 
         for i in range(10):
-            if (sum+i)%10 == 0:
+            if (sum + i) % 10 == 0:
                 return str(i)
 
     def get_balance(self, card_num):
@@ -102,7 +103,6 @@ class BankingSystem:
         self.conn.commit()
         print('Income was added!\n')
 
-
     def do_transfer(self, card_num):
 
         print('Transfer')
@@ -114,8 +114,8 @@ class BankingSystem:
         if len(dest_card) != 16:
             wrong_card_num = True
         if not wrong_card_num:
-            last_digit = dest_card[len(dest_card)-1]
-            check_sum = self.get_check_sum(dest_card[0:len(dest_card)-1])
+            last_digit = dest_card[len(dest_card) - 1]
+            check_sum = self.get_check_sum(dest_card[0:len(dest_card) - 1])
             if check_sum != last_digit:
                 wrong_card_num = True
 
@@ -131,10 +131,10 @@ class BankingSystem:
         transfer_amt = int(input('Enter how much money you want to transfer:'))
         balance = self.get_balance(card_num)
         dest_balance = self.get_balance(dest_card)
-        if balance<transfer_amt:
+        if balance < transfer_amt:
             print('Not enough money!')
         else:
-            new_dest_balance = dest_balance +transfer_amt
+            new_dest_balance = dest_balance + transfer_amt
             new_balance = balance - transfer_amt
             curr.execute(f'update card set balance = {new_balance} where number = {card_num}')
             curr.execute(f'update card set balance = {new_dest_balance} where number = {dest_card}')
@@ -146,6 +146,7 @@ class BankingSystem:
         curr.execute(f'delete from card where number ={card_num}')
         self.conn.commit()
         print('The account has been closed!')
+
 
 isExit = False
 
